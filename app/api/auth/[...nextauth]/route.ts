@@ -1,3 +1,5 @@
+export const dynamic = "force-static";
+
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 
@@ -12,7 +14,10 @@ export const authOptions: NextAuthOptions = {
   // Add more NextAuth configurations if needed (e.g., callbacks, session, etc.)
 };
 
-// NextAuth handler using Next.js API route handler syntax
-const handler = NextAuth(authOptions);
+export async function GET() {
+  return NextAuth(authOptions);
+}
 
-export { handler as GET, handler as POST };
+export async function POST() {
+  return NextAuth(authOptions);
+}
