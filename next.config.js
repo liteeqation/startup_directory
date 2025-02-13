@@ -12,13 +12,4 @@ module.exports = {
     ],
     dangerouslyAllowSVG: true,
   },
-  webpack(config, { isServer }) {
-    if (!isServer) {
-      // This is important to prevent issues with server-side rendering
-      config.node = {
-        fs: "empty",
-      };
-    }
-    return config;
-  },
 };
