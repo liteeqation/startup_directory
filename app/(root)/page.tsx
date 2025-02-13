@@ -8,7 +8,7 @@ import { auth } from "/auth";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ query?: String }>;
+  searchParams: Promise<{ query?: string }>;
 }) {
   const query = (await searchParams).query;
   const params = { search: query || null };

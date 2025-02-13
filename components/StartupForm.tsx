@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useActionState } from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import MDEditor from "@uiw/react-md-editor";
@@ -11,6 +11,13 @@ import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { createPitch } from "@/lib/actions";
+import { useActionState } from "@/hooks/useActionState";
+
+// Step 1: Define a more specific type for prevState
+interface PrevState {
+  error: string;
+  status: string;
+}
 
 const StartupForm = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -18,7 +25,8 @@ const StartupForm = () => {
   const { toast } = useToast();
   const router = useRouter();
 
-  const handleFormSubmit = async (prevState: any, formData: FormData) => {
+  // Step 2: Update handleFormSubmit function to use the proper types
+  const handleFormSubmit = async (prevState: PrevState, formData: FormData) => {
     try {
       const formValues = {
         title: formData.get("title") as string,
@@ -32,7 +40,7 @@ const StartupForm = () => {
 
       const result = await createPitch(prevState, formData, pitch);
 
-      if (result.status == "SUCCESS") {
+      if (result.status === "SUCCESS") {
         toast({
           title: "Success",
           description: "Your startup pitch has been created successfully",
@@ -44,9 +52,8 @@ const StartupForm = () => {
       return result;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const fieldErorrs = error.flatten().fieldErrors;
-
-        setErrors(fieldErorrs as unknown as Record<string, string>);
+        const fieldErrors = error.flatten().fieldErrors;
+        setErrors(fieldErrors as unknown as Record<string, string>);
 
         toast({
           title: "Error",
@@ -89,7 +96,6 @@ const StartupForm = () => {
           required
           placeholder="Startup Title"
         />
-
         {errors.title && <p className="startup-form_error">{errors.title}</p>}
       </div>
 
@@ -104,7 +110,6 @@ const StartupForm = () => {
           required
           placeholder="Startup Description"
         />
-
         {errors.description && (
           <p className="startup-form_error">{errors.description}</p>
         )}
@@ -121,7 +126,6 @@ const StartupForm = () => {
           required
           placeholder="Startup Category (Tech, Health, Education...)"
         />
-
         {errors.category && (
           <p className="startup-form_error">{errors.category}</p>
         )}
@@ -138,7 +142,6 @@ const StartupForm = () => {
           required
           placeholder="Startup Image URL use unsplash links"
         />
-
         {errors.link && <p className="startup-form_error">{errors.link}</p>}
       </div>
 
@@ -146,7 +149,6 @@ const StartupForm = () => {
         <label htmlFor="pitch" className="startup-form_label">
           Pitch
         </label>
-
         <MDEditor
           value={pitch}
           onChange={(value) => setPitch(value as string)}
@@ -162,7 +164,6 @@ const StartupForm = () => {
             disallowedElements: ["style"],
           }}
         />
-
         {errors.pitch && <p className="startup-form_error">{errors.pitch}</p>}
       </div>
 
