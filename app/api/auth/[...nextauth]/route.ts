@@ -1,6 +1,5 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
-import { NextApiRequest, NextApiResponse } from "next";
 
 // Define authOptions with NextAuthOptions type
 export const authOptions: NextAuthOptions = {
@@ -13,10 +12,7 @@ export const authOptions: NextAuthOptions = {
   // Add more NextAuth configurations if needed (e.g., callbacks, session, etc.)
 };
 
-// Type the request and response parameters for the handler
-const handler = (req: NextApiRequest, res: NextApiResponse) => {
-  return NextAuth(req, res, authOptions);
-};
+// NextAuth handler using Next.js API route handler syntax
+const handler = NextAuth(authOptions);
 
-// Export the handler for GET and POST methods
 export { handler as GET, handler as POST };
