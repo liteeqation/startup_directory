@@ -1,0 +1,15 @@
+module.exports = {
+  experimental: {
+    appDir: true,
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "placehold.co",
+        pathname: "/**",
+      },
+    ],
+    dangerouslyAllowSVG: true, // Enable SVGs
+  },
+};
