@@ -18,116 +18,92 @@ const md = markdownit();
 
 export const experimental_ppr = true;
 
-const Page = async ({ params }: { params: { id: string } }) => {
-  try {
-    const { id } = await params;
+const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
+  const id = (await params).id;
 
-    // Fetch startup data and editor picks
-    const [post, editorData] = await Promise.all([
-      client.fetch(STARTUP_BY_ID_QUERY, { id }),
-      client.fetch(PLAYLIST_BY_SLUG_QUERY, { slug: "editor-picks-new" }),
-    ]);
+  const [post, { select: editorPosts }] = await Promise.all([
+    client.fetch(STARTUP_BY_ID_QUERY, { id }),
+    client.fetch(PLAYLIST_BY_SLUG_QUERY, {
+      slug: "editor-picks-new",
+    }),
+  ]);
 
-    // Ensure post exists, otherwise return 404
-    if (!post) return notFound();
+  if (!post) return notFound();
 
-    // Ensure editor picks are correctly extracted
-    const editorPosts: StartupTypeCard[] = editorData?.select || [];
+  const parsedContent = md.render(post?.pitch || "");
 
-    // Convert markdown pitch to HTML
-    const parsedContent = md.render(post?.pitch || "");
+  return (
+    <>
+      <section className="pink_container !min-h-[230px]">
+        <p className="tag">{formatDate(post?._createdAt)}</p>
 
-    return (
-      <>
-        {/* Startup Info */}
-        <section className="pink_container !min-h-[230px]">
-          <p className="tag">{formatDate(post?._createdAt)}</p>
+        <h1 className="heading">{post.title}</h1>
+        <p className="sub-heading !max-w-5xl">{post.description}</p>
+      </section>
 
-          <h1 className="heading">{post.title}</h1>
-          <p className="sub-heading !max-w-5xl">{post.description}</p>
-        </section>
+      <section className="section_container">
+        <img
+          src={post.image}
+          alt="thumbnail"
+          className="w-full h-auto rounded-xl"
+        />
 
-        {/* Startup Image & Details */}
-        <section className="section_container">
-          {post.image && (
-            <img
-              src={post.image}
-              alt="thumbnail"
-              className="w-full h-auto rounded-xl"
-            />
-          )}
-
-          <div className="space-y-5 mt-10 max-w-4xl mx-auto">
-            <div className="flex-between gap-5">
-              {/* Author Info */}
-              {post.author ? (
-                <Link
-                  href={`/user/${post.author?._id}`}
-                  className="flex gap-2 items-center mb-3"
-                >
-                  {post.author.image && (
-                    <Image
-                      src={post.author.image}
-                      alt="avatar"
-                      width={64}
-                      height={64}
-                      className="rounded-full drop-shadow-lg"
-                    />
-                  )}
-                  <div>
-                    <p className="text-20-medium">
-                      {post.author.name || "Unknown"}
-                    </p>
-                    <p className="text-16-medium !text-black-300">
-                      @{post.author.username || "N/A"}
-                    </p>
-                  </div>
-                </Link>
-              ) : (
-                <p className="text-16-medium !text-black-300">Unknown Author</p>
-              )}
-
-              <p className="category-tag">{post.category || "Uncategorized"}</p>
-            </div>
-
-            {/* Pitch Details */}
-            <h3 className="text-30-bold">Pitch Details</h3>
-            {parsedContent ? (
-              <article
-                className="prose max-w-4xl font-work-sans break-all"
-                dangerouslySetInnerHTML={{ __html: parsedContent }}
+        <div className="space-y-5 mt-10 max-w-4xl mx-auto">
+          <div className="flex-between gap-5">
+            <Link
+              href={`/user/${post.author?._id}`}
+              className="flex gap-2 items-center mb-3"
+            >
+              <Image
+                src={post.author.image}
+                alt="avatar"
+                width={64}
+                height={64}
+                className="rounded-full drop-shadow-lg"
               />
-            ) : (
-              <p className="no-result">No details provided</p>
-            )}
+
+              <div>
+                <p className="text-20-medium">{post.author.name}</p>
+                <p className="text-16-medium !text-black-300">
+                  @{post.author.username}
+                </p>
+              </div>
+            </Link>
+
+            <p className="category-tag">{post.category}</p>
           </div>
 
-          <hr className="divider" />
-
-          {/* Editor Picks Section */}
-          {editorPosts.length > 0 && (
-            <div className="max-w-4xl mx-auto">
-              <p className="text-30-semibold">Editor Picks</p>
-
-              <ul className="mt-7 card_grid-sm">
-                {editorPosts.map((post: StartupTypeCard, i: number) => (
-                  <StartupCard key={i} post={post} />
-                ))}
-              </ul>
-            </div>
+          <h3 className="text-30-bold">Pitch Details</h3>
+          {parsedContent ? (
+            <article
+              className="prose max-w-4xl font-work-sans break-all"
+              dangerouslySetInnerHTML={{ __html: parsedContent }}
+            />
+          ) : (
+            <p className="no-result">No details provided</p>
           )}
+        </div>
 
-          {/* View Component with Suspense */}
-          <Suspense fallback={<Skeleton className="view_skeleton" />}>
-            <View id={id} />
-          </Suspense>
-        </section>
-      </>
-    );
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    return <p className="text-red-500 text-center">Error loading data.</p>;
-  }
+        <hr className="divider" />
+
+        {editorPosts?.length > 0 && (
+          <div className="max-w-4xl mx-auto">
+            <p className="text-30-semibold">Editor Picks</p>
+
+            <ul className="mt-7 card_grid-sm">
+              {editorPosts.map((post: StartupTypeCard, i: number) => (
+                <StartupCard key={i} post={post} />
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <Suspense fallback={<Skeleton className="view_skeleton" />}>
+          <View id={id} />
+        </Suspense>
+      </section>
+    </>
+  );
 };
 
 export default Page;
