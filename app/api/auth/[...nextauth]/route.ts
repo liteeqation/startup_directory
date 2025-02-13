@@ -1,23 +1,29 @@
 export const dynamic = "force-static";
 
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 
-// Define authOptions with NextAuthOptions type
-export const authOptions: NextAuthOptions = {
-  providers: [
-    GitHubProvider({
-      clientId: process.env.AUTH_GITHUB_ID as string,
-      clientSecret: process.env.AUTH_GITHUB_SECRET as string,
-    }),
-  ],
-  // Add more NextAuth configurations if needed (e.g., callbacks, session, etc.)
-};
-
+// Define NextAuth options directly inside the handler
 export async function GET() {
-  return NextAuth(authOptions);
+  return NextAuth({
+    providers: [
+      GitHubProvider({
+        clientId: process.env.AUTH_GITHUB_ID as string,
+        clientSecret: process.env.AUTH_GITHUB_SECRET as string,
+      }),
+    ],
+    // You can also add other configurations like callbacks, session, etc.
+  });
 }
 
 export async function POST() {
-  return NextAuth(authOptions);
+  return NextAuth({
+    providers: [
+      GitHubProvider({
+        clientId: process.env.AUTH_GITHUB_ID as string,
+        clientSecret: process.env.AUTH_GITHUB_SECRET as string,
+      }),
+    ],
+    // You can also add other configurations like callbacks, session, etc.
+  });
 }
