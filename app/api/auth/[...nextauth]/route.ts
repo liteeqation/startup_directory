@@ -1,10 +1,8 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
-import { NextApiRequest, NextApiResponse } from "next";
 
-// Define authOptions with NextAuthOptions type
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   providers: [
     GitHubProvider({
       clientId: process.env.AUTH_GITHUB_ID as string,
@@ -15,13 +13,9 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.AUTH_GOOGLE_SECRET as string,
     }),
   ],
-  // Add more NextAuth configurations if needed (e.g., callbacks, session, etc.)
 };
 
-// Type the request and response parameters for the handler
-const handler = (req: NextApiRequest, res: NextApiResponse) => {
-  return NextAuth(req, res, authOptions);
-};
+const handler = NextAuth(authOptions);
 
-// Export the handler for GET and POST methods
+// Correct way to export handlers for App Router
 export { handler as GET, handler as POST };
